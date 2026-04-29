@@ -1,0 +1,108 @@
+﻿:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.85);
+    --accent-color: #14b8a6;
+    --accent-hover: #0f766e;
+    --text-color: #f1f5f9;
+    --subtitle-color: #94a3b8;
+    --border-color: rgba(148, 163, 184, 0.2);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+.navbar {
+    background: rgba(30, 41, 59, 0.95);
+    padding: 16px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo { font-size: 1.8rem; font-weight: 700; }
+
+.main-container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+.welcome { text-align: center; margin-bottom: 30px; font-size: 2.2rem; }
+
+.tabs { display: flex; justify-content: center; margin-bottom: 30px; gap: 10px; }
+
+.tab-btn {
+    padding: 12px 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--accent-color);
+    border-bottom: 3px solid var(--accent-color);
+}
+
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    padding: 35px;
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    margin-bottom: 30px;
+}
+
+.input-group { margin-bottom: 20px; }
+
+.input-group label { display: block; margin-bottom: 8px; color: var(--subtitle-color); }
+
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(15,23,42,0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-color);
+}
+
+button {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(90deg, var(--accent-color), #2dd4bf);
+    color: #0f172a;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+button:hover {
+    transform: translateY(-3px);
+}
+
+.upload-area {
+    margin: 25px 0;
+    padding: 25px;
+    border: 2px dashed var(--accent-color);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.flashcard {
+    background: #334155;
+    padding: 18px;
+    margin: 12px 0;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.results { margin-top: 30px; }
