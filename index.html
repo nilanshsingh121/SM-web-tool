@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta name="google-site-verification" content="X3wwg1jjUsGA4MpBFRa3ucvgbHkxF6WZLU0iGgSyOz4" />
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FB5KDMPCE5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-FB5KDMPCE5');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ translations['title'] }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🤖 {{ translations['title'] }}</div>
+        <div>
+            <a href="{{ url_for('set_lang', lang='en') }}">English</a> |
+            <a href="{{ url_for('set_lang', lang='hi') }}">हिंदी</a>
+            <a href="{{ url_for('logout') }}" style="margin-left: 20px;">{{ translations['logout'] }}</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h1 class="welcome">{{ translations['welcome'] }}</h1>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab(0)">{{ translations['planner'] }}</button>
+            <button class="tab-btn" onclick="showTab(1)">{{ translations['analyzer'] }}</button>
+        </div>
+
+        <!-- Study Planner Tab -->
+        <div id="tab-0" class="tab-content active">
+            <div class="card">
+                <h2>Generate Your Study Plan</h2>
+                <form id="study-form">
+                    <div class="input-group">
+                        <label>Subjects (comma separated)</label>
+                        <input type="text" id="subjects" placeholder="Math, Physics, Chemistry" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Exam Date</label>
+                        <input type="date" id="exam-date" required>
+                    </div>
+                    <button type="submit">Generate Plan</button>
+                </form>
+            </div>
+
+            <div id="results-container" class="card" style="display: none;">
+                <h2>Your Study Plan</h2>
+                <div id="study-plan"></div>
+            </div>
+        </div>
+
+        <!-- Resource Analyzer Tab -->
+        <div id="tab-1" class="tab-content">
+            <div class="card">
+                <h2>Resource Analyzer</h2>
+                <p>Upload PDF or paste YouTube link to get summary, flashcards & notes</p>
+
+                <!-- PDF Upload -->
+                <div class="upload-area">
+                    <h3>📄 Upload PDF</h3>
+                    <input type="file" id="pdf-input" accept="application/pdf">
+                    <button onclick="uploadPDF()">Analyze PDF</button>
+                </div>
+
+                <!-- Video URL -->
+                <div class="upload-area">
+                    <h3>🎬 YouTube / Video URL</h3>
+                    <input type="text" id="video-url" placeholder="https://youtube.com/watch?v=...">
+                    <button onclick="processVideo()">Analyze Video</button>
+                </div>
+
+                <div id="resource-results" class="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

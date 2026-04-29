@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Buddy - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h1>?? Study Buddy</h1>
+        <p>Sign in to continue your study journey</p>
+        
+        <form method="POST">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="input-group">
+                <select name="lang">
+                    <option value="hi">?????</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            <button type="submit">Login / ????? ????</button>
+        </form>
+        
+        <p class="demo">
+            Demo: <strong>admin</strong> / <strong>password</strong><br>
+            or <strong>student</strong> / <strong>123456</strong>
+        </p>
+    </div>
+</body>
+</html>
