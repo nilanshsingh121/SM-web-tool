@@ -47,4 +47,4 @@ TRANSLATIONS = {
 }
 
 def get_locale():
-    return session.get("lang", "hi
+    return session.get("lang", "hi")
