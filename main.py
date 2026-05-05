@@ -28,12 +28,12 @@ TRANSLATIONS = {
         'login': 'Login'
     },
     'hi': {
-        'title': '????? ???',
-        'welcome': "?????? ?????! ?? ????? ????",
-        'planner': '????? ??????',
-        'analyzer': '??????? ????????',
-        'logout': '??????',
-        'login': '?????'
+        'title': 'स्टडी बडी',
+        'welcome': "अरे दोस्त! चलो पढ़ाई करते हैं",
+        'planner': 'स्टडी प्लानर',
+        'analyzer': 'रिसोर्स एनालाइजर',
+        'logout': 'लॉगआउट',
+        'login': 'लॉगिन'
     }
 }
 
@@ -103,6 +103,7 @@ def generate_plan():
         day = 1
         idx = 0
 
+        # Initial subject allocation (2 subjects per day)
         while idx < len(subjects) and day <= study_days:
             today_sub = [subjects[idx]]
             idx += 1
@@ -112,9 +113,12 @@ def generate_plan():
             plan[f'Day {day}'] = " + ".join(today_sub)
             day += 1
 
-        for i in range(study_days - (day - 1)):
+        # Remaining study days as review
+        remaining_study_days = study_days - (day - 1)
+        for i in range(remaining_study_days):
             plan[f'Day {day + i}'] = f"Review: {subjects[i % len(subjects)]}"
 
+        # Revision phase
         for i in range(revision_days):
             plan[f'Day {study_days + i + 1}'] = 'Revision'
 
@@ -127,6 +131,7 @@ def generate_plan():
 def upload_pdf():
     if 'pdf' not in request.files:
         return jsonify({'error': 'No PDF uploaded'}), 400
+    
     file = request.files['pdf']
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
@@ -140,11 +145,11 @@ def upload_pdf():
         reader = PyPDF2.PdfReader(filepath)
         for page in reader.pages:
             text += page.extract_text() or ""
-    except:
+    except Exception:
         text = "Could not extract text from PDF."
 
     return jsonify({
-        'summary': f"?? Summary of {filename}:\n\n{text[:800]}...",
+        'summary': f"📄 Summary of {filename}:\n\n{text[:800]}...",
         'flashcards': [
             {"q": "What is the main topic?", "a": "This PDF covers important concepts of the subject."},
             {"q": "Key takeaway?", "a": "Focus on definitions and examples given."}
@@ -159,7 +164,7 @@ def process_video():
     data = request.get_json()
     url = data.get('url', '')
     return jsonify({
-        'summary': f"?? Video Summary from: {url}\nThis video explains the topic clearly with examples.",
+        'summary': f"🎥 Video Summary from: {url}\nThis video explains the topic clearly with examples.",
         'flashcards': [
             {"q": "What does the video teach?", "a": "Core concepts with practical examples"},
             {"q": "Most important point?", "a": "Pay attention to the examples shown."}
