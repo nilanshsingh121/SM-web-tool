@@ -2,20 +2,12 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import os
 import datetime
 import math
+import PyPDF2
 from werkzeug.utils import secure_filename
 
-# Safe import for PyPDF2
-try:
-    import PyPDF2
-except ImportError:
-    PyPDF2 = None
-
 app = Flask(__name__)
+app.secret_key = 'studybuddy_secret_key_2026'
 
-# Better secret key handling
-app.secret_key = os.environ.get('SECRET_KEY', 'studybuddy_secret_key_2026')
-
-# Upload folder setup
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -25,7 +17,7 @@ USERS = {
     'student': '123456'
 }
 
-# Translations (fixed encoding)
+# Translations
 TRANSLATIONS = {
     'en': {
         'title': 'Study Buddy',
@@ -36,26 +28,24 @@ TRANSLATIONS = {
         'login': 'Login'
     },
     'hi': {
-        'title': 'स्टडी बडी',
-        'welcome': "चलो पढ़ाई शुरू करें!",
-        'planner': 'स्टडी प्लानर',
-        'analyzer': 'रिसोर्स एनालाइज़र',
-        'logout': 'लॉगआउट',
-        'login': 'लॉगिन'
+        'title': '????? ???',
+        'welcome': "?????? ?????! ?? ????? ????",
+        'planner': '????? ??????',
+        'analyzer': '??????? ????????',
+        'logout': '??????',
+        'login': '?????'
     }
 }
 
 def get_locale():
     return session.get('lang', 'hi')
 
-
 @app.route('/')
 def index():
     if 'username' not in session:
         return redirect(url_for('login_page'))
     lang = get_locale()
-    return render_template('index.html', lang=lang, translations=TRANSLATIONS.get(lang, TRANSLATIONS['en']))
-
+    return render_template('index.html', lang=lang, translations=TRANSLATIONS[lang])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
@@ -63,22 +53,17 @@ def login_page():
         username = request.form.get('username')
         password = request.form.get('password')
         lang = request.form.get('lang', 'hi')
-
         if username in USERS and USERS[username] == password:
             session['username'] = username
             session['lang'] = lang
             return redirect(url_for('index'))
-
         return "Invalid credentials! Please try again."
-
     return render_template('login.html')
-
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return redirect(url_for('login_page'))
-
 
 @app.route('/set_lang/<lang>')
 def set_lang(lang):
@@ -86,16 +71,11 @@ def set_lang(lang):
         session['lang'] = lang
     return redirect(request.referrer or url_for('index'))
 
-
 # Study Planner
 @app.route('/generate_plan', methods=['POST'])
 def generate_plan():
     try:
         data = request.get_json()
-
-        if not data:
-            return jsonify({'error': 'No data received'}), 400
-
         subjects_str = data.get('subjects')
         exam_date_str = data.get('exam_date')
 
@@ -126,11 +106,9 @@ def generate_plan():
         while idx < len(subjects) and day <= study_days:
             today_sub = [subjects[idx]]
             idx += 1
-
             if idx < len(subjects):
                 today_sub.append(subjects[idx])
                 idx += 1
-
             plan[f'Day {day}'] = " + ".join(today_sub)
             day += 1
 
@@ -141,69 +119,54 @@ def generate_plan():
             plan[f'Day {study_days + i + 1}'] = 'Revision'
 
         return jsonify({'plan': plan})
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 # PDF Upload
 @app.route('/upload_pdf', methods=['POST'])
 def upload_pdf():
+    if 'pdf' not in request.files:
+        return jsonify({'error': 'No PDF uploaded'}), 400
+    file = request.files['pdf']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+
+    text = ""
     try:
-        if 'pdf' not in request.files:
-            return jsonify({'error': 'No PDF uploaded'}), 400
+        reader = PyPDF2.PdfReader(filepath)
+        for page in reader.pages:
+            text += page.extract_text() or ""
+    except:
+        text = "Could not extract text from PDF."
 
-        file = request.files['pdf']
-
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-
-        text = ""
-
-        if PyPDF2:
-            try:
-                reader = PyPDF2.PdfReader(filepath)
-                for page in reader.pages:
-                    text += page.extract_text() or ""
-            except Exception:
-                text = "Could not extract text from PDF."
-        else:
-            text = "PyPDF2 not installed."
-
-        return jsonify({
-            'summary': f"Summary of {filename}:\n\n{text[:800]}...",
-            'flashcards': [
-                {"q": "What is the main topic?", "a": "This PDF covers important concepts."},
-                {"q": "Key takeaway?", "a": "Focus on definitions and examples."}
-            ],
-            'notes': "• Important definitions\n• Key formulas\n• Practice tips\n• Avoid mistakes",
-            'filename': filename
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+    return jsonify({
+        'summary': f"?? Summary of {filename}:\n\n{text[:800]}...",
+        'flashcards': [
+            {"q": "What is the main topic?", "a": "This PDF covers important concepts of the subject."},
+            {"q": "Key takeaway?", "a": "Focus on definitions and examples given."}
+        ],
+        'notes': "• Important definitions\n• Key formulas/examples\n• Practice tips\n• Common mistakes to avoid",
+        'filename': filename
+    })
 
 # Video Processing
 @app.route('/process_video', methods=['POST'])
 def process_video():
-    try:
-        data = request.get_json()
-        url = data.get('url', '') if data else ''
+    data = request.get_json()
+    url = data.get('url', '')
+    return jsonify({
+        'summary': f"?? Video Summary from: {url}\nThis video explains the topic clearly with examples.",
+        'flashcards': [
+            {"q": "What does the video teach?", "a": "Core concepts with practical examples"},
+            {"q": "Most important point?", "a": "Pay attention to the examples shown."}
+        ],
+        'notes': "• Introduction to topic\n• Detailed explanation\n• Real-life examples\n• Quick revision tips",
+        'url': url
+    })
 
-        return jsonify({
-            'summary': f"Video Summary from: {url}",
-            'flashcards': [
-                {"q": "What does the video teach?", "a": "Core concepts"},
-                {"q": "Most important point?", "a": "Focus on examples"}
-            ],
-            'notes': "• Introduction\n• Explanation\n• Examples\n• Revision tips",
-            'url': url
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+if __name__ == '__main__':
+    app.run(debug=True)
